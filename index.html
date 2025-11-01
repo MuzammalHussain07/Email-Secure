@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gmail OTP Forwarder Demo</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; background:#f6f8fb; margin:0; padding:20px; }
+  h1 { text-align:center; color:#333; }
+  .container { max-width:800px; margin:auto; background:white; border-radius:12px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
+  .msg { background:#eef3ff; padding:12px; border-radius:8px; margin-bottom:10px; animation:fadeIn .5s ease; }
+  .msg strong { color:#1a73e8; }
+  #otpTable { width:100%; border-collapse:collapse; margin-top:15px; }
+  #otpTable th, #otpTable td { border:1px solid #ccc; padding:8px; text-align:center; }
+  #otpTable th { background:#1a73e8; color:white; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+  button { background:#1a73e8; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; margin-top:10px; }
+  button:hover { background:#155fc0; }
+</style>
+</head>
+<body>
+
+<h1>📧 Gmail OTP Forwarder Demo</h1>
+<div class="container">
+  <p>This simulates how the service reads new emails, detects OTP codes (4–8 digits), forwards them, and stores in a database table.</p>
+
+  <div id="inbox"></div>
+
+  <button id="simulateBtn">Simulate New Incoming Email</button>
+
+  <h3>📋 Captured OTP Table</h3>
+  <table id="otpTable">
+    <thead><tr><th>OTP Code</th><th>Sender</th><th>Subject</th><th>Timestamp</th></tr></thead>
+    <tbody id="otpBody"></tbody>
+  </table>
+</div>
+
+<script>
+const inbox = document.getElementById("inbox");
+const otpBody = document.getElementById("otpBody");
+
+const sampleEmails = [
+  { sender:"no-reply@bank.com", subject:"Your OTP code", body:"Dear user, your OTP is 482931 for login verification." },
+  { sender:"alerts@shop.com", subject:"Verify purchase", body:"Please confirm your transaction with code 9975." },
+  { sender:"noreply@paynow.com", subject:"Security check", body:"Enter one-time password 563912 within 5 minutes." },
+  { sender:"friend@example.com", subject:"Hello!", body:"Hey, let’s catch up tomorrow." }
+];
+
+function simulateEmail() {
+  const mail = sampleEmails[Math.floor(Math.random()*sampleEmails.length)];
+  const msg = document.createElement("div");
+  msg.className="msg";
+  msg.innerHTML = `<strong>From:</strong> ${mail.sender}<br>
+                   <strong>Subject:</strong> ${mail.subject}<br>
+                   ${mail.body}`;
+  inbox.prepend(msg);
+  detectOtp(mail);
+}
+
+function detectOtp(mail) {
+  const match = mail.body.match(/\b\d{4,8}\b/);
+  if(match) {
+    const otp = match[0];
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${otp}</td><td>${mail.sender}</td><td>${mail.subject}</td><td>${new Date().toLocaleTimeString()}</td>`;
+    otpBody.prepend(row);
+    animateForwarding(mail, otp);
+  }
+}
+
+function animateForwarding(mail, otp) {
+  const note = document.createElement("div");
+  note.className="msg";
+  note.style.background="#d4edda";
+  note.innerHTML = `✅ Forwarded message from <strong>${mail.sender}</strong> with OTP <strong>${otp}</strong>`;
+  inbox.prepend(note);
+  setTimeout(()=> note.remove(), 3000);
+}
+
+document.getElementById("simulateBtn").addEventListener("click", simulateEmail);
+</script>
+
+</body>
+</html>
